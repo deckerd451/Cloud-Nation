@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Join Cloud Nation</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Orbitron', sans-serif;
@@ -63,17 +63,40 @@
     <button type="submit">Activate CRT</button>
   </form>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    document.getElementById('crt-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('name').value;
-      const city = document.getElementById('city').value;
-      const role = document.getElementById('role').value;
+    // TODO: Replace these with your Supabase project details
+    const SUPABASE_URL = 'https://your-project.supabase.co';
+    const SUPABASE_ANON_KEY = 'your-anon-key';
 
-      alert(`CRT activated for ${name} — ${role} from ${city}.`);
-      // Firebase or API integration goes here
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const form = document.getElementById('crt-form');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = form.name.value.trim();
+      const city = form.city.value.trim();
+      const role = form.role.value;
+
+      if (!name || !city || !role) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('crt_signals')
+        .insert([{ name, city, role }]);
+
+      if (error) {
+        console.error('Error saving signal:', error);
+        alert('Oops, something went wrong. Try again later.');
+      } else {
+        alert(`CRT activated for ${name} — ${role} from ${city}. Welcome to Cloud Nation!`);
+        form.reset();
+      }
     });
   </script>
 </body>
 </html>
-

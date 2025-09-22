@@ -4,9 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DEX – Innovation Engine</title>
-  <link rel="stylesheet" href="../styles.css" />
-  <!-- Font Awesome icons for tab labels -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-j5S7pBrc+6M45+Drl9Nb9Vr85DjHLa7t29lDo6qe+bn+Df7dMe9Ccr7E64HkVyibGdMpxOFy/XLW8aA3GgA+9A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<!-- ✅ CSS -->
+<link rel="stylesheet" href="assets/css/styles.css">
+
+<!-- ✅ FontAwesome without integrity (simplest fix) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+>
 </head>
 <body class="two-card-page">
   <!-- Global starfield background canvas -->
@@ -140,11 +143,13 @@
   <!-- Application scripts -->
   <!-- The order matters: the Supabase client must be initialised first, then
        the starfield background, synapse logic, and finally the UI logic. -->
-  <script type="module" src="./assets/js/supabaseClient.js"></script>
-  <script type="module" src="./assets/js/starfield.js"></script>
-  <script type="module" src="./assets/js/synapse.js"></script>
-  <script type="module" src="./assets/js/main.js"></script>
-  <script type="module" src="./assets/js/login.js"></script>
-  <script type="module" src="./assets/js/profile.js"></script>
+  <!-- ✅ JS -->
+<script type="module" src="assets/js/supabaseClient.js"></script>
+<script type="module" src="assets/js/main.js"></script>
+<script type="module" src="assets/js/login.js"></script>
+<script type="module" src="assets/js/profile.js"></script>
+<script type="module" src="assets/js/synapse.js"></script>
+<script type="module" src="assets/js/starfield.js"></script>
+
 </body>
 </html>

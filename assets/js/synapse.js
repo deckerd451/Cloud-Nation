@@ -53,10 +53,10 @@ export async function initSynapseView() {
   window.addEventListener('resize', resizeCanvas);
 
   // Fetch community members and connections
-  const { data: members, error: communityError } = await supabaseClient
-    .from('community')
-    .select('id,name,role,interests,image_url');
-  if (communityError) {
+ const { data, error } = await supabase
+  .from("community")
+  .select("id, name, role, interests, x, y, image_url, endorsements, created_at");
+ if (communityError) {
     console.error('[Synapse] Error fetching community:', communityError);
     return;
   }

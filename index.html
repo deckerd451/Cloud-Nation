@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DEX – Innovation Engine</title>
-<!-- ✅ CSS -->
-<link rel="stylesheet" href="assets/css/styles.css">
 
-<!-- ✅ FontAwesome without integrity (simplest fix) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
->
+  <!-- ✅ CSS -->
+  <link rel="stylesheet" href="assets/css/styles.css">
+
+  <!-- ✅ FontAwesome without integrity (simplest fix) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="two-card-page">
   <!-- Global starfield background canvas -->
@@ -132,24 +132,18 @@
       <!-- Synapse View tab -->
       <div id="synapse" class="tab-content-pane">
         <h2 class="section-title">Synapse View</h2>
-        <!-- suggestions panel for predictive matches -->
         <div id="suggestionsPanel" class="card-container"></div>
-        <!-- network canvas overlay; transparent so starfield shows through -->
         <canvas id="synapseCanvas"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- Application scripts -->
-  <!-- The order matters: the Supabase client must be initialised first, then
-       the starfield background, synapse logic, and finally the UI logic. -->
-  <!-- ✅ JS -->
-<script type="module" src="assets/js/supabaseClient.js"></script>
-<script type="module" src="assets/js/main.js"></script>
-<script type="module" src="assets/js/login.js"></script>
-<script type="module" src="assets/js/profile.js"></script>
-<script type="module" src="assets/js/synapse.js"></script>
-<script type="module" src="assets/js/starfield.js"></script>
-
+  <!-- ✅ Scripts -->
+  <script type="module" src="assets/js/supabaseClient.js"></script>
+  <script type="module" src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/login.js"></script>
+  <script type="module" src="assets/js/profile.js"></script>
+  <script type="module" src="assets/js/synapse.js"></script>
+  <script type="module" src="assets/js/starfield.js"></script>
 </body>
 </html>

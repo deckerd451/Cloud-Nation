@@ -1,2 +1,0 @@
-# DEX Synaptic View
-TBD

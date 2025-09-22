@@ -1,0 +1,249 @@
+/* styles.css - Minimal styling for Dex Synapse View
+
+This stylesheet contains only the necessary CSS rules to support the
+Dex Synapse view and basic UI elements. It uses a dark theme,
+positions a starfield canvas behind all content, and defines the
+layout for the header, tab navigation, login/profile forms, suggestion
+panel, and the synapse canvas.
+*/
+
+/* Reset box sizing and margins */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Base dark theme */
+body {
+    font-family: Arial, sans-serif;
+    color: #fff;
+    background: #000;
+    min-height: 100vh;
+}
+
+/* Starfield canvas covers the entire viewport and sits behind everything */
+#starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Container to center content and set max width */
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header section with app title and tagline */
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.header h1 {
+    font-size: 3rem;
+    color: #ffd700; /* gold accent */
+    margin: 0;
+}
+.header p {
+    font-size: 1.1rem;
+    color: #cccccc;
+}
+
+/* Authentication controls: user badge and logout button */
+.auth-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.user-badge {
+    background: #2a2a2a;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.logout-btn {
+    background: #444;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.logout-btn:hover {
+    background: #555;
+}
+
+/* Tab navigation */
+.tab-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+}
+.tab-button {
+    background: #2a2a3a;
+    color: #eee;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.tab-button:hover {
+    background: #3a3a4a;
+}
+.tab-button.active {
+    background: #ffd700;
+    color: #222;
+    font-weight: bold;
+}
+
+/* Tab content panes */
+.tab-content-pane {
+    display: none;
+    padding-bottom: 20px;
+}
+.tab-content-pane.active-tab-pane {
+    display: block;
+}
+
+/* Login section */
+#login-section {
+    max-width: 420px;
+    margin: 0 auto 20px;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+}
+#login-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+}
+#login-section input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #fff;
+}
+#login-section button {
+    width: 100%;
+    padding: 10px;
+    background: #ffd700;
+    border: none;
+    border-radius: 4px;
+    color: #222;
+    font-weight: bold;
+    cursor: pointer;
+}
+#login-section button:hover {
+    background: #e5c100;
+}
+
+/* Profile section forms */
+#profile-section .input-container {
+    margin-bottom: 15px;
+}
+#profile-section input,
+#profile-section select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #fff;
+}
+#profile-section button[type="submit"] {
+    padding: 10px 20px;
+    background: #ffd700;
+    border: none;
+    border-radius: 4px;
+    color: #222;
+    font-weight: bold;
+    cursor: pointer;
+}
+#profile-section button[type="submit"]:hover {
+    background: #e5c100;
+}
+
+/* Suggestions panel for predictive matches */
+#suggestionsPanel {
+    max-width: 420px;
+    margin: 20px auto;
+    background: #1e1e1e;
+    padding: 12px;
+    border-radius: 8px;
+}
+#suggestionsPanel h3 {
+    color: #ffd700;
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+    text-align: center;
+}
+.user-card {
+    background: #2a2a3a;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+.user-card .user-info {
+    flex: 1;
+    margin-right: 10px;
+}
+.user-card button {
+    padding: 4px 8px;
+    background: #ffd700;
+    border: none;
+    border-radius: 4px;
+    color: #222;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.user-card button:hover {
+    background: #e5c100;
+}
+
+/* Synapse canvas */
+#synapseCanvas {
+    width: 100%;
+    height: calc(100vh - 200px); /* fill remaining height under tabs */
+    background: transparent;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .tab-nav {
+        flex-wrap: wrap;
+    }
+    .tab-button {
+        flex-grow: 1;
+        text-align: center;
+    }
+    #synapseCanvas {
+        height: 60vh;
+    }
+    #suggestionsPanel {
+        width: 90%;
+    }
+}

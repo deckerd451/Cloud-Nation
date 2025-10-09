@@ -13,21 +13,17 @@ function getRedirectURL() {
   const host = window.location.hostname;
 
   if (host === "localhost" || host === "127.0.0.1") {
-    // local dev
     return "http://localhost:5173/2card.html";
   }
 
   if (host === "decker451.github.io") {
-    // GitHub Pages hosted app (fixes 404)
     return "https://decker451.github.io/Cloud-Nation/";
   }
 
   if (host.includes("charlestonhacks.com")) {
-    // CharlestonHacks live deployment
     return "https://charlestonhacks.com/2card.html";
   }
 
-  // fallback
   return window.location.origin + "/";
 }
 
@@ -35,8 +31,14 @@ function getRedirectURL() {
 // Handle redirect tokens automatically
 // ============================
 (async () => {
+  const verifyScreen = document.getElementById("verify-screen");
   const hash = window.location.hash;
+
   if (hash.includes("access_token")) {
+    // show splash
+    verifyScreen.classList.remove("hidden");
+    requestAnimationFrame(() => verifyScreen.classList.add("opacity-100", "flex"));
+
     const params = new URLSearchParams(hash.substring(1));
     const access_token = params.get("access_token");
     const refresh_token = params.get("refresh_token");
@@ -44,11 +46,20 @@ function getRedirectURL() {
     if (access_token && refresh_token) {
       await supabase.auth.setSession({ access_token, refresh_token });
       window.history.replaceState({}, document.title, window.location.pathname);
+
+      // hide splash smoothly
+      verifyScreen.classList.remove("opacity-100");
+      setTimeout(() => verifyScreen.classList.add("hidden"), 500);
+
       showDashboard();
+    } else {
+      verifyScreen.classList.add("hidden");
+      showAuth();
     }
   } else {
     const { data } = await supabase.auth.getSession();
     if (data?.session) showDashboard();
+    else showAuth();
   }
 })();
 
@@ -68,13 +79,12 @@ loginBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   if (!email) return alert("Enter your email.");
 
-  // 👇 choose correct environment-aware redirect URL
   const redirectURL = getRedirectURL();
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectURL, // always matches deployed path
+      emailRedirectTo: redirectURL,
     },
   });
 
@@ -101,7 +111,6 @@ supabase.auth.onAuthStateChange(async (_event, session) => {
   if (session) {
     const { user } = session;
 
-    // check if this user already has a profile
     const { data: existingProfile, error } = await supabase
       .from("community")
       .select("*")
@@ -110,11 +119,8 @@ supabase.auth.onAuthStateChange(async (_event, session) => {
 
     if (error) console.error("Profile check error:", error);
 
-    if (!existingProfile) {
-      showOnboardingModal(user);
-    } else {
-      showDashboard();
-    }
+    if (!existingProfile) showOnboardingModal(user);
+    else showDashboard();
   } else {
     showAuth();
   }
@@ -173,9 +179,6 @@ addMemberBtn.addEventListener("click", async () => {
   const interests = document.getElementById("interests").value.trim();
 
   if (!name || !email) return alert("Name and email required.");
-
-  const { data: userData } = await supabase.auth.getUser();
-  const user_id = userData?.user?.id;
 
   const { error } = await supabase.from("community").insert([
     {

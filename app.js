@@ -13,17 +13,21 @@ function getRedirectURL() {
   const host = window.location.hostname;
 
   if (host === "localhost" || host === "127.0.0.1") {
+    // local dev
     return "http://localhost:5173/2card.html";
   }
 
   if (host === "decker451.github.io") {
+    // GitHub Pages hosted app (fixes 404)
     return "https://decker451.github.io/Cloud-Nation/";
   }
 
   if (host.includes("charlestonhacks.com")) {
+    // CharlestonHacks live deployment
     return "https://charlestonhacks.com/2card.html";
   }
 
+  // fallback
   return window.location.origin + "/";
 }
 
@@ -36,6 +40,7 @@ function getRedirectURL() {
     const params = new URLSearchParams(hash.substring(1));
     const access_token = params.get("access_token");
     const refresh_token = params.get("refresh_token");
+
     if (access_token && refresh_token) {
       await supabase.auth.setSession({ access_token, refresh_token });
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -63,17 +68,15 @@ loginBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   if (!email) return alert("Enter your email.");
 
-  // Force redirect URL (reliable for GitHub Pages)
+  // 👇 choose correct environment-aware redirect URL
   const redirectURL = getRedirectURL();
 
-const { error } = await supabase.auth.signInWithOtp({
-  email,
-  options: {
-    // Force the exact redirect path every time (fixes the 404)
-    emailRedirectTo: "https://decker451.github.io/Cloud-Nation/",
-  },
-});
-
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: redirectURL, // always matches deployed path
+    },
+  });
 
   if (error) {
     console.error(error);
@@ -98,7 +101,7 @@ supabase.auth.onAuthStateChange(async (_event, session) => {
   if (session) {
     const { user } = session;
 
-    // Check if this user already has a profile
+    // check if this user already has a profile
     const { data: existingProfile, error } = await supabase
       .from("community")
       .select("*")
@@ -125,7 +128,6 @@ function showOnboardingModal(user) {
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 
-  // Save handler
   document.getElementById("save-profile").onclick = async () => {
     const name = document.getElementById("onboard-name").value.trim();
     const role = document.getElementById("onboard-role").value.trim();
@@ -154,7 +156,6 @@ function showOnboardingModal(user) {
     }
   };
 
-  // Skip handler
   document.getElementById("skip-profile").onclick = () => {
     modal.classList.add("hidden");
     showDashboard();

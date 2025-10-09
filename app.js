@@ -1,185 +1,230 @@
-// =======================================================
-// Dex-Inspired CRM - Supabase CDN Version
-// Works directly on GitHub Pages with no build tools
-// =======================================================
-
 const supabase = window.supabase.createClient(
   window.SUPABASE_URL,
   window.SUPABASE_ANON_KEY
 );
 
+// DOM refs
+const auth = document.getElementById("auth");
+const dashboard = document.getElementById("dashboard");
+const loginBtn = document.getElementById("login-btn");
+const logoutBtn = document.getElementById("logout");
+const addMemberBtn = document.getElementById("addMember");
 
-// ✅ Select DOM elements
-const app = document.getElementById('app');
-const authSection = document.getElementById('auth-section');
-const dashboard = document.getElementById('dashboard');
-const loginBtn = document.getElementById('login-btn');
-const logoutBtn = document.getElementById('logout');
-const addContactBtn = document.getElementById('addContact');
+// ============================
+// AUTH
+// ============================
+loginBtn.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  if (!email) return alert("Enter an email");
+  const { error } = await supabase.auth.signInWithOtp({ email });
+  if (error) alert(error.message);
+  else alert("Magic link sent! Check your email.");
+});
 
-// =======================================
-// AUTHENTICATION
-// =======================================
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  showAuth();
+});
 
-// Magic link login
-if (loginBtn) {
-  loginBtn.addEventListener('click', async () => {
-    const email = document.getElementById('email').value.trim();
-    if (!email) {
-      alert('Please enter your email.');
-      return;
-    }
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.href },
-    });
-    if (error) alert(error.message);
-    else alert('Magic link sent! Check your email to sign in.');
-  });
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session) showDashboard();
+  else showAuth();
+});
+
+function showAuth() {
+  auth.classList.remove("hidden");
+  dashboard.classList.add("hidden");
 }
 
-// Listen for auth state changes
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    showDashboard();
-  } else {
-    showAuth();
+function showDashboard() {
+  auth.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+  loadCommunity();
+  loadConnections();
+}
+
+// ============================
+// ADD MEMBER
+// ============================
+addMemberBtn.addEventListener("click", async () => {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  const role = document.getElementById("role").value.trim();
+  const skills = document.getElementById("skills").value.trim();
+  const interests = document.getElementById("interests").value.trim();
+
+  const { data: userData } = await supabase.auth.getUser();
+  const user_id = userData?.user?.id;
+
+  if (!name || !email) return alert("Name and email required.");
+
+  const { error } = await supabase.from("community").insert([
+    {
+      name,
+      email,
+      role,
+      skills,
+      interests,
+      created_at: new Date().toISOString(),
+    },
+  ]);
+
+  if (error) console.error(error);
+  else {
+    alert("Member added!");
+    loadCommunity();
   }
 });
 
-// =======================================
-// DASHBOARD FUNCTIONS
-// =======================================
-
-async function showDashboard() {
-  authSection.classList.add('hidden');
-  dashboard.classList.remove('hidden');
-  await loadContacts();
-}
-
-function showAuth() {
-  dashboard.classList.add('hidden');
-  authSection.classList.remove('hidden');
-}
-
-// Log out
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    showAuth();
-  });
-}
-
-// =======================================
-// CONTACT MANAGEMENT
-// =======================================
-
-// Add new contact
-if (addContactBtn) {
-  addContactBtn.addEventListener('click', async () => {
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('emailInput').value.trim();
-    const company = document.getElementById('company').value.trim();
-    const category = document.getElementById('category').value.trim();
-    const notes = document.getElementById('notes').value.trim();
-
-    if (!name || !email) {
-      alert('Please fill in at least name and email.');
-      return;
-    }
-
-    const { data: userData } = await supabase.auth.getUser();
-    const user_id = userData?.user?.id;
-
-    const { error } = await supabase.from('contacts').insert([
-      { name, email, company, category, notes, user_id },
-    ]);
-    if (error) {
-      console.error(error);
-      alert('Error adding contact.');
-    } else {
-      alert('Contact added!');
-      await loadContacts();
-    }
-  });
-}
-
-// =======================================
-// LOAD CONTACTS + CHART
-// =======================================
-
-async function loadContacts() {
-  const { data: userData } = await supabase.auth.getUser();
-  const user_id = userData?.user?.id;
-  if (!user_id) return;
-
-  const { data: contacts, error } = await supabase
-    .from('contacts')
-    .select('*')
-    .eq('user_id', user_id)
-    .order('created_at', { ascending: false });
+// ============================
+// LOAD COMMUNITY
+// ============================
+async function loadCommunity() {
+  const { data, error } = await supabase
+    .from("community")
+    .select("id, name, skills, role");
 
   if (error) {
     console.error(error);
     return;
   }
 
-  renderChart(contacts);
+  renderSkillChart(data);
 }
 
-// =======================================
-// CHART.JS Visualization
-// =======================================
+// ============================
+// SKILL CHART (Chart.js)
+// ============================
+function renderSkillChart(members) {
+  const skillsCount = {};
 
-let chart;
-
-function renderChart(contacts = []) {
-  const ctx = document.getElementById('contactChart');
-  if (!ctx) return;
-
-  const categories = {};
-  contacts.forEach((c) => {
-    const key = c.category?.trim() || 'Uncategorized';
-    categories[key] = (categories[key] || 0) + 1;
+  members.forEach((m) => {
+    if (!m.skills) return;
+    m.skills.split(",").map((s) => s.trim()).forEach((s) => {
+      skillsCount[s] = (skillsCount[s] || 0) + 1;
+    });
   });
 
-  const labels = Object.keys(categories);
-  const values = Object.values(categories);
+  const ctx = document.getElementById("skillsChart");
+  if (!ctx) return;
 
-  if (chart) chart.destroy();
+  if (window.skillsChart) window.skillsChart.destroy();
 
-  chart = new Chart(ctx, {
-    type: 'bar',
+  window.skillsChart = new Chart(ctx, {
+    type: "bar",
     data: {
-      labels,
+      labels: Object.keys(skillsCount),
       datasets: [
         {
-          label: 'Contacts by Category',
-          data: values,
-          backgroundColor: 'rgba(59,130,246,0.6)',
-          borderColor: '#3B82F6',
-          borderWidth: 1,
+          label: "Members per Skill",
+          data: Object.values(skillsCount),
+          backgroundColor: "rgba(37,99,235,0.7)",
         },
       ],
     },
     options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-      },
+      plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: '#ccc' } },
-        y: { ticks: { color: '#ccc' } },
+        x: { ticks: { color: "#ccc" } },
+        y: { ticks: { color: "#ccc" } },
       },
     },
   });
 }
 
-// =======================================
-// INIT
-// =======================================
+// ============================
+// NETWORK GRAPH (D3)
+// ============================
+async function loadConnections() {
+  const { data: community } = await supabase
+    .from("community")
+    .select("id, name");
+  const { data: connections } = await supabase
+    .from("connections")
+    .select("from_user_id, to_user_id");
 
-(async () => {
-  const { data } = await supabase.auth.getSession();
-  if (data?.session) showDashboard();
-})();
+  if (!community || !connections) return;
+
+  const nodes = community.map((u) => ({
+    id: u.id,
+    name: u.name,
+  }));
+
+  const links = connections.map((c) => ({
+    source: c.from_user_id,
+    target: c.to_user_id,
+  }));
+
+  renderNetwork(nodes, links);
+}
+
+function renderNetwork(nodes, links) {
+  const svg = d3.select("#networkGraph");
+  svg.selectAll("*").remove();
+
+  const width = svg.node().clientWidth;
+  const height = svg.node().clientHeight;
+
+  const simulation = d3
+    .forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id((d) => d.id).distance(120))
+    .force("charge", d3.forceManyBody().strength(-200))
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+  const link = svg
+    .append("g")
+    .attr("stroke", "#444")
+    .selectAll("line")
+    .data(links)
+    .enter()
+    .append("line")
+    .attr("stroke-width", 1);
+
+  const node = svg
+    .append("g")
+    .selectAll("circle")
+    .data(nodes)
+    .enter()
+    .append("circle")
+    .attr("r", 6)
+    .attr("fill", "#3b82f6")
+    .call(
+      d3
+        .drag()
+        .on("start", (event, d) => {
+          if (!event.active) simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        })
+        .on("drag", (event, d) => {
+          d.fx = event.x;
+          d.fy = event.y;
+        })
+        .on("end", (event, d) => {
+          if (!event.active) simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+        })
+    );
+
+  const label = svg
+    .append("g")
+    .selectAll("text")
+    .data(nodes)
+    .enter()
+    .append("text")
+    .text((d) => d.name)
+    .attr("font-size", "10px")
+    .attr("fill", "#aaa");
+
+  simulation.on("tick", () => {
+    link
+      .attr("x1", (d) => d.source.x)
+      .attr("y1", (d) => d.source.y)
+      .attr("x2", (d) => d.target.x)
+      .attr("y2", (d) => d.target.y);
+
+    node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+    label.attr("x", (d) => d.x + 8).attr("y", (d) => d.y + 4);
+  });
+}

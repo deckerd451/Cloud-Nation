@@ -1,4 +1,6 @@
+// ============================
 // Initialize Supabase
+// ============================
 const supabase = window.supabase.createClient(
   window.SUPABASE_URL,
   window.SUPABASE_ANON_KEY
@@ -46,13 +48,44 @@ function getRedirectURL() {
 })();
 
 // ============================
-// DOM references
+// DOM References
 // ============================
 const auth = document.getElementById("auth");
 const dashboard = document.getElementById("dashboard");
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout");
 const addMemberBtn = document.getElementById("addMember");
+
+// ============================
+// LOGIN HANDLER (Magic Link)
+// ============================
+loginBtn.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  if (!email) return alert("Enter your email.");
+
+  // Force redirect URL (reliable for GitHub Pages)
+  const redirectURL = getRedirectURL();
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: redirectURL },
+  });
+
+  if (error) {
+    console.error(error);
+    alert("Error sending magic link: " + error.message);
+  } else {
+    alert("Magic link sent! Check your inbox to log in.");
+  }
+});
+
+// ============================
+// LOGOUT HANDLER
+// ============================
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  showAuth();
+});
 
 // ============================
 // AUTH & ONBOARDING
@@ -110,7 +143,7 @@ function showOnboardingModal(user) {
 
     if (error) {
       console.error(error);
-      alert("Error saving profile");
+      alert("Error saving profile.");
     } else {
       modal.classList.add("hidden");
       showDashboard();
@@ -123,7 +156,6 @@ function showOnboardingModal(user) {
     showDashboard();
   };
 }
-
 
 // ============================
 // ADD COMMUNITY MEMBER
@@ -153,7 +185,7 @@ addMemberBtn.addEventListener("click", async () => {
 
   if (error) {
     console.error(error);
-    alert("Error adding member");
+    alert("Error adding member.");
   } else {
     alert("Member added!");
     loadCommunity();
@@ -169,7 +201,6 @@ async function loadCommunity() {
     .select("id, name, skills, role");
 
   if (error) return console.error(error);
-
   renderSkillChart(data);
 }
 
@@ -181,9 +212,12 @@ function renderSkillChart(members) {
 
   members.forEach((m) => {
     if (!m.skills) return;
-    m.skills.split(",").map((s) => s.trim()).forEach((s) => {
-      skillsCount[s] = (skillsCount[s] || 0) + 1;
-    });
+    m.skills
+      .split(",")
+      .map((s) => s.trim())
+      .forEach((s) => {
+        skillsCount[s] = (skillsCount[s] || 0) + 1;
+      });
   });
 
   const ctx = document.getElementById("skillsChart");
@@ -308,4 +342,19 @@ function renderNetwork(nodes, links) {
     node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
     label.attr("x", (d) => d.x + 8).attr("y", (d) => d.y + 4);
   });
+}
+
+// ============================
+// VIEW HELPERS
+// ============================
+function showAuth() {
+  auth.classList.remove("hidden");
+  dashboard.classList.add("hidden");
+}
+
+function showDashboard() {
+  auth.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+  loadCommunity();
+  loadConnections();
 }

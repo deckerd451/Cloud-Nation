@@ -1,9 +1,53 @@
+// Initialize Supabase
 const supabase = window.supabase.createClient(
   window.SUPABASE_URL,
   window.SUPABASE_ANON_KEY
 );
 
-// DOM refs
+// ============================
+// Environment-aware redirect URL
+// ============================
+function getRedirectURL() {
+  const host = window.location.hostname;
+
+  if (host === "localhost" || host === "127.0.0.1") {
+    return "http://localhost:5173/2card.html";
+  }
+
+  if (host === "decker451.github.io") {
+    return "https://decker451.github.io/Cloud-Nation/";
+  }
+
+  if (host.includes("charlestonhacks.com")) {
+    return "https://charlestonhacks.com/2card.html";
+  }
+
+  return window.location.origin + "/";
+}
+
+// ============================
+// Handle redirect tokens automatically
+// ============================
+(async () => {
+  const hash = window.location.hash;
+  if (hash.includes("access_token")) {
+    const params = new URLSearchParams(hash.substring(1));
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+    if (access_token && refresh_token) {
+      await supabase.auth.setSession({ access_token, refresh_token });
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showDashboard();
+    }
+  } else {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session) showDashboard();
+  }
+})();
+
+// ============================
+// DOM references
+// ============================
 const auth = document.getElementById("auth");
 const dashboard = document.getElementById("dashboard");
 const loginBtn = document.getElementById("login-btn");
@@ -16,9 +60,14 @@ const addMemberBtn = document.getElementById("addMember");
 loginBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   if (!email) return alert("Enter an email");
-  const { error } = await supabase.auth.signInWithOtp({ email });
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: getRedirectURL() },
+  });
+
   if (error) alert(error.message);
-  else alert("Magic link sent! Check your email.");
+  else alert("Magic link sent! Check your inbox.");
 });
 
 logoutBtn.addEventListener("click", async () => {
@@ -44,7 +93,7 @@ function showDashboard() {
 }
 
 // ============================
-// ADD MEMBER
+// ADD COMMUNITY MEMBER
 // ============================
 addMemberBtn.addEventListener("click", async () => {
   const name = document.getElementById("name").value.trim();
@@ -53,10 +102,10 @@ addMemberBtn.addEventListener("click", async () => {
   const skills = document.getElementById("skills").value.trim();
   const interests = document.getElementById("interests").value.trim();
 
+  if (!name || !email) return alert("Name and email required.");
+
   const { data: userData } = await supabase.auth.getUser();
   const user_id = userData?.user?.id;
-
-  if (!name || !email) return alert("Name and email required.");
 
   const { error } = await supabase.from("community").insert([
     {
@@ -69,31 +118,30 @@ addMemberBtn.addEventListener("click", async () => {
     },
   ]);
 
-  if (error) console.error(error);
-  else {
+  if (error) {
+    console.error(error);
+    alert("Error adding member");
+  } else {
     alert("Member added!");
     loadCommunity();
   }
 });
 
 // ============================
-// LOAD COMMUNITY
+// LOAD COMMUNITY MEMBERS
 // ============================
 async function loadCommunity() {
   const { data, error } = await supabase
     .from("community")
     .select("id, name, skills, role");
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (error) return console.error(error);
 
   renderSkillChart(data);
 }
 
 // ============================
-// SKILL CHART (Chart.js)
+// CHART: Skill Distribution
 // ============================
 function renderSkillChart(members) {
   const skillsCount = {};
@@ -133,7 +181,7 @@ function renderSkillChart(members) {
 }
 
 // ============================
-// NETWORK GRAPH (D3)
+// NETWORK GRAPH
 // ============================
 async function loadConnections() {
   const { data: community } = await supabase

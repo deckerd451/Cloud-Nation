@@ -66,10 +66,14 @@ loginBtn.addEventListener("click", async () => {
   // Force redirect URL (reliable for GitHub Pages)
   const redirectURL = getRedirectURL();
 
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: redirectURL },
-  });
+const { error } = await supabase.auth.signInWithOtp({
+  email,
+  options: {
+    // Force the exact redirect path every time (fixes the 404)
+    emailRedirectTo: "https://decker451.github.io/Cloud-Nation/",
+  },
+});
+
 
   if (error) {
     console.error(error);

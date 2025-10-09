@@ -35,9 +35,11 @@ function getRedirectURL() {
   const hash = window.location.hash;
 
   if (hash.includes("access_token")) {
-    // show splash
+    // Show the verifying overlay
     verifyScreen.classList.remove("hidden");
-    requestAnimationFrame(() => verifyScreen.classList.add("opacity-100", "flex"));
+    requestAnimationFrame(() =>
+      verifyScreen.classList.add("opacity-100", "flex")
+    );
 
     const params = new URLSearchParams(hash.substring(1));
     const access_token = params.get("access_token");
@@ -47,7 +49,7 @@ function getRedirectURL() {
       await supabase.auth.setSession({ access_token, refresh_token });
       window.history.replaceState({}, document.title, window.location.pathname);
 
-      // hide splash smoothly
+      // Smooth fade out overlay
       verifyScreen.classList.remove("opacity-100");
       setTimeout(() => verifyScreen.classList.add("hidden"), 500);
 

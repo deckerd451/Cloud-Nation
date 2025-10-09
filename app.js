@@ -55,42 +55,75 @@ const logoutBtn = document.getElementById("logout");
 const addMemberBtn = document.getElementById("addMember");
 
 // ============================
-// AUTH
+// AUTH & ONBOARDING
 // ============================
-loginBtn.addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  if (!email) return alert("Enter an email");
+supabase.auth.onAuthStateChange(async (_event, session) => {
+  if (session) {
+    const { user } = session;
 
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: getRedirectURL() },
-  });
+    // Check if this user already has a profile
+    const { data: existingProfile, error } = await supabase
+      .from("community")
+      .select("*")
+      .eq("email", user.email)
+      .maybeSingle();
 
-  if (error) alert(error.message);
-  else alert("Magic link sent! Check your inbox.");
+    if (error) console.error("Profile check error:", error);
+
+    if (!existingProfile) {
+      showOnboardingModal(user);
+    } else {
+      showDashboard();
+    }
+  } else {
+    showAuth();
+  }
 });
 
-logoutBtn.addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  showAuth();
-});
+// ============================
+// Show onboarding modal
+// ============================
+function showOnboardingModal(user) {
+  const modal = document.getElementById("onboard-modal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 
-supabase.auth.onAuthStateChange((_event, session) => {
-  if (session) showDashboard();
-  else showAuth();
-});
+  // Save handler
+  document.getElementById("save-profile").onclick = async () => {
+    const name = document.getElementById("onboard-name").value.trim();
+    const role = document.getElementById("onboard-role").value.trim();
+    const skills = document.getElementById("onboard-skills").value.trim();
+    const interests = document.getElementById("onboard-interests").value.trim();
 
-function showAuth() {
-  auth.classList.remove("hidden");
-  dashboard.classList.add("hidden");
+    if (!name) return alert("Please enter your name.");
+
+    const { error } = await supabase.from("community").insert([
+      {
+        name,
+        email: user.email,
+        role,
+        skills,
+        interests,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    if (error) {
+      console.error(error);
+      alert("Error saving profile");
+    } else {
+      modal.classList.add("hidden");
+      showDashboard();
+    }
+  };
+
+  // Skip handler
+  document.getElementById("skip-profile").onclick = () => {
+    modal.classList.add("hidden");
+    showDashboard();
+  };
 }
 
-function showDashboard() {
-  auth.classList.add("hidden");
-  dashboard.classList.remove("hidden");
-  loadCommunity();
-  loadConnections();
-}
 
 // ============================
 // ADD COMMUNITY MEMBER

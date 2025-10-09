@@ -3,11 +3,11 @@
 // Works directly on GitHub Pages with no build tools
 // =======================================================
 
-// ✅ Import config values (make sure config.js is loaded first)
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+const supabase = window.supabase.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_ANON_KEY
+);
 
-// ✅ Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ✅ Select DOM elements
 const app = document.getElementById('app');

@@ -6,7 +6,7 @@
     <title>Dex AEI Community Dashboard</title>
     <link rel="icon" href="assets/brain.ico" />
 
-    <!-- Tailwind -->
+    <!-- Tailwind (fine for now, though better replaced with compiled CSS later) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Chart.js & D3.js -->
@@ -25,15 +25,13 @@
         padding: 1rem;
         border: 1px solid rgba(255, 255, 255, 0.1);
       }
-      canvas {
+      canvas, svg {
         background: #111;
         border-radius: 0.5rem;
       }
       svg {
         width: 100%;
         height: 500px;
-        background: #0f0f0f;
-        border-radius: 0.5rem;
       }
     </style>
   </head>
@@ -43,7 +41,7 @@
       Dex AEI Community Dashboard
     </h1>
 
-    <!-- Authentication -->
+    <!-- AUTH SCREEN -->
     <div id="auth" class="card max-w-md mx-auto mb-6 text-center">
       <h2 class="text-xl mb-3 font-semibold">Sign In / Sign Up</h2>
       <input
@@ -60,7 +58,7 @@
       </button>
     </div>
 
-    <!-- Dashboard -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="hidden space-y-6">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-semibold">Community</h2>
@@ -72,7 +70,7 @@
         </button>
       </div>
 
-      <!-- Add member form -->
+      <!-- ADD MEMBER -->
       <div class="card max-w-xl mx-auto">
         <h3 class="text-lg font-semibold mb-2">Add Community Member</h3>
         <input id="name" placeholder="Name" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
@@ -85,86 +83,65 @@
         </button>
       </div>
 
-      <!-- Skill Chart -->
+      <!-- SKILL CHART -->
       <div class="card">
         <h3 class="text-lg font-semibold mb-3">Skill Insights</h3>
         <canvas id="skillsChart"></canvas>
       </div>
 
-      <!-- Network Visualization -->
+      <!-- NETWORK GRAPH -->
       <div class="card">
         <h3 class="text-lg font-semibold mb-3">Community Network</h3>
         <svg id="networkGraph"></svg>
       </div>
     </div>
 
-    <!-- Supabase -->
+    <!-- SUPABASE SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js"></script>
 
-    <!-- Config + App -->
+    <!-- CONFIG + APP -->
     <script src="config.js"></script>
-    <script type="module" src="app.js"></script>
-    <!-- 🧭 Onboarding Modal -->
-<div
-  id="onboard-modal"
-  class="fixed inset-0 bg-black bg-opacity-70 hidden justify-center items-center z-50"
->
-  <div class="bg-gray-900 p-6 rounded-xl w-full max-w-md shadow-lg border border-gray-700">
-    <h2 class="text-2xl font-bold text-blue-400 mb-4 text-center">Welcome!</h2>
-    <p class="text-sm text-gray-300 mb-4 text-center">
-      Let’s complete your profile to join the Dex AEI community.
-    </p>
+    <!-- ✅ IMPORTANT: REMOVE type="module" -->
+    <script src="app.js"></script>
 
-    <input
-      id="onboard-name"
-      type="text"
-      placeholder="Full Name"
-      class="p-2 w-full mb-3 rounded bg-gray-800 text-white"
-    />
-    <input
-      id="onboard-role"
-      type="text"
-      placeholder="Role / Title"
-      class="p-2 w-full mb-3 rounded bg-gray-800 text-white"
-    />
-    <input
-      id="onboard-skills"
-      type="text"
-      placeholder="Skills (comma-separated)"
-      class="p-2 w-full mb-3 rounded bg-gray-800 text-white"
-    />
-    <input
-      id="onboard-interests"
-      type="text"
-      placeholder="Interests"
-      class="p-2 w-full mb-4 rounded bg-gray-800 text-white"
-    />
+    <!-- 🧭 ONBOARDING MODAL -->
+    <div
+      id="onboard-modal"
+      class="fixed inset-0 bg-black bg-opacity-70 hidden justify-center items-center z-50"
+    >
+      <div class="bg-gray-900 p-6 rounded-xl w-full max-w-md shadow-lg border border-gray-700">
+        <h2 class="text-2xl font-bold text-blue-400 mb-4 text-center">Welcome!</h2>
+        <p class="text-sm text-gray-300 mb-4 text-center">
+          Let’s complete your profile to join the Dex AEI community.
+        </p>
 
-    <div class="flex gap-3">
-      <button
-        id="save-profile"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
-      >
-        Save Profile
-      </button>
-      <button
-        id="skip-profile"
-        class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-2 rounded w-full"
-      >
-        Skip
-      </button>
+        <input id="onboard-name" type="text" placeholder="Full Name" class="p-2 w-full mb-3 rounded bg-gray-800 text-white" />
+        <input id="onboard-role" type="text" placeholder="Role / Title" class="p-2 w-full mb-3 rounded bg-gray-800 text-white" />
+        <input id="onboard-skills" type="text" placeholder="Skills (comma-separated)" class="p-2 w-full mb-3 rounded bg-gray-800 text-white" />
+        <input id="onboard-interests" type="text" placeholder="Interests" class="p-2 w-full mb-4 rounded bg-gray-800 text-white" />
+
+        <div class="flex gap-3">
+          <button id="save-profile" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">
+            Save Profile
+          </button>
+          <button id="skip-profile" class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-2 rounded w-full">
+            Skip
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-    <!-- 🌀 Verifying Login Splash -->
-<div
-  id="verify-screen"
-  class="fixed inset-0 hidden bg-black bg-opacity-90 z-50 flex-col justify-center items-center text-center opacity-0 transition-opacity duration-500"
->
-  <div class="animate-pulse text-blue-400 text-2xl font-bold mb-3">
-    Verifying login...
-  </div>
-  <p class="text-gray-400 text-sm">Connecting to Dex AEI Community Dashboard</p>
-</div>
-</body>
+
+    <!-- 🌀 VERIFYING LOGIN SPLASH -->
+    <div
+      id="verify-screen"
+      class="fixed inset-0 hidden bg-black bg-opacity-90 z-50 flex-col justify-center items-center text-center opacity-0 transition-opacity duration-500"
+    >
+      <div class="animate-pulse text-blue-400 text-2xl font-bold mb-3">
+        Verifying login...
+      </div>
+      <p class="text-gray-400 text-sm">
+        Connecting to Dex AEI Community Dashboard
+      </p>
+    </div>
+  </body>
 </html>

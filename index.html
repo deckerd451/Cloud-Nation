@@ -2,23 +2,86 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dex Inspired CRM</title>
-    <!-- Tailwind CSS for rapid styling -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <!-- Chart.js for simple charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <!-- Supabase JS client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.4/dist/supabase.min.js"></script>
+
+    <!-- ✅ TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- ✅ Chart.js for analytics visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      body {
+        background: #0b0b0b;
+        color: #e5e7eb;
+        font-family: system-ui, sans-serif;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+      .btn {
+        background-color: #2563eb;
+        color: white;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s ease-in-out;
+      }
+      .btn:hover {
+        background-color: #1d4ed8;
+      }
+    </style>
   </head>
-  <body class="bg-gray-50 text-gray-900">
-    <div id="app" class="max-w-5xl mx-auto p-4"></div>
-    <!-- Config and app logic -->
-    <script type="module" src="./config.js"></script>
-    <script type="module" src="./app.js"></script>
+
+  <body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div id="app" class="w-full max-w-3xl text-center">
+      <h1 class="text-3xl font-bold mb-6 text-blue-400">Dex Inspired CRM</h1>
+      <div id="auth-section" class="card mb-6">
+        <h2 class="text-xl mb-4 font-semibold">Sign In / Sign Up</h2>
+        <input
+          id="email"
+          type="email"
+          placeholder="Enter your email"
+          class="p-2 w-full mb-4 rounded bg-gray-800 text-white"
+        />
+        <button id="login-btn" class="btn w-full">Send Magic Link</button>
+      </div>
+
+      <div id="dashboard" class="hidden">
+        <h2 class="text-2xl mb-4 font-semibold">Welcome to your dashboard</h2>
+
+        <!-- Contact form -->
+        <div class="card mb-4">
+          <h3 class="text-lg mb-2 font-semibold">Add Contact</h3>
+          <input id="name" placeholder="Name" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+          <input id="emailInput" placeholder="Email" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+          <input id="company" placeholder="Company" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+          <input id="category" placeholder="Category (e.g., Investor)" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+          <textarea id="notes" placeholder="Notes" class="p-2 w-full mb-2 rounded bg-gray-800 text-white"></textarea>
+          <button id="addContact" class="btn w-full">Add Contact</button>
+        </div>
+
+        <!-- Chart -->
+        <div class="card">
+          <h3 class="text-lg mb-2 font-semibold">Contact Overview</h3>
+          <canvas id="contactChart"></canvas>
+        </div>
+
+        <button id="logout" class="btn w-full mt-4 bg-red-600 hover:bg-red-700">Log Out</button>
+      </div>
+    </div>
+
+    <!-- ✅ Supabase must be loaded FIRST -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js"></script>
+
+    <!-- ✅ Then your configuration (update with your keys) -->
+    <script type="module" src="config.js"></script>
+
+    <!-- ✅ Then your main app logic -->
+    <script type="module" src="app.js"></script>
   </body>
 </html>

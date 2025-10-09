@@ -1,89 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="icon" href="brain.ico" />
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dex Inspired CRM</title>
+    <title>Dex AEI Community Dashboard</title>
+    <link rel="icon" href="assets/brain.ico" />
 
-    <!-- ✅ TailwindCSS CDN -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- ✅ Chart.js for analytics visualization -->
+    <!-- Chart.js for skill analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- D3.js for network visualization -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 
     <style>
       body {
-        background: #0b0b0b;
+        background-color: #0a0a0a;
         color: #e5e7eb;
         font-family: system-ui, sans-serif;
       }
       .card {
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 0.75rem;
         padding: 1rem;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
-      .btn {
-        background-color: #2563eb;
-        color: white;
+      canvas {
+        background: #111;
         border-radius: 0.5rem;
-        padding: 0.5rem 1rem;
-        transition: all 0.2s ease-in-out;
       }
-      .btn:hover {
-        background-color: #1d4ed8;
+      svg {
+        width: 100%;
+        height: 500px;
+        background: #0f0f0f;
+        border-radius: 0.5rem;
       }
     </style>
   </head>
 
-  <body class="min-h-screen flex flex-col items-center justify-center p-4">
-    <div id="app" class="w-full max-w-3xl text-center">
-      <h1 class="text-3xl font-bold mb-6 text-blue-400">Dex Inspired CRM</h1>
-      <div id="auth-section" class="card mb-6">
-        <h2 class="text-xl mb-4 font-semibold">Sign In / Sign Up</h2>
-        <input
-          id="email"
-          type="email"
-          placeholder="Enter your email"
-          class="p-2 w-full mb-4 rounded bg-gray-800 text-white"
-        />
-        <button id="login-btn" class="btn w-full">Send Magic Link</button>
+  <body class="min-h-screen p-4">
+    <h1 class="text-3xl font-bold text-blue-400 text-center mb-6">
+      Dex AEI Community Dashboard
+    </h1>
+
+    <!-- Authentication -->
+    <div id="auth" class="card max-w-md mx-auto mb-6 text-center">
+      <h2 class="text-xl mb-3 font-semibold">Sign In / Sign Up</h2>
+      <input
+        id="email"
+        type="email"
+        placeholder="Enter your email"
+        class="p-2 w-full mb-4 rounded bg-gray-800 text-white"
+      />
+      <button
+        id="login-btn"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
+      >
+        Send Magic Link
+      </button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden space-y-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold">Community</h2>
+        <button
+          id="logout"
+          class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white"
+        >
+          Log Out
+        </button>
       </div>
 
-      <div id="dashboard" class="hidden">
-        <h2 class="text-2xl mb-4 font-semibold">Welcome to your dashboard</h2>
+      <!-- Add member form -->
+      <div class="card max-w-xl mx-auto">
+        <h3 class="text-lg font-semibold mb-2">Add Community Member</h3>
+        <input id="name" placeholder="Name" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+        <input id="emailInput" placeholder="Email" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+        <input id="role" placeholder="Role" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+        <input id="skills" placeholder="Skills (comma-separated)" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+        <input id="interests" placeholder="Interests" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
+        <button id="addMember" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">
+          Add Member
+        </button>
+      </div>
 
-        <!-- Contact form -->
-        <div class="card mb-4">
-          <h3 class="text-lg mb-2 font-semibold">Add Contact</h3>
-          <input id="name" placeholder="Name" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
-          <input id="emailInput" placeholder="Email" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
-          <input id="company" placeholder="Company" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
-          <input id="category" placeholder="Category (e.g., Investor)" class="p-2 w-full mb-2 rounded bg-gray-800 text-white" />
-          <textarea id="notes" placeholder="Notes" class="p-2 w-full mb-2 rounded bg-gray-800 text-white"></textarea>
-          <button id="addContact" class="btn w-full">Add Contact</button>
-        </div>
+      <!-- Skill Chart -->
+      <div class="card">
+        <h3 class="text-lg font-semibold mb-3">Skill Insights</h3>
+        <canvas id="skillsChart"></canvas>
+      </div>
 
-        <!-- Chart -->
-        <div class="card">
-          <h3 class="text-lg mb-2 font-semibold">Contact Overview</h3>
-          <canvas id="contactChart"></canvas>
-        </div>
-
-        <button id="logout" class="btn w-full mt-4 bg-red-600 hover:bg-red-700">Log Out</button>
+      <!-- Network Visualization -->
+      <div class="card">
+        <h3 class="text-lg font-semibold mb-3">Community Network</h3>
+        <svg id="networkGraph"></svg>
       </div>
     </div>
 
-    <!-- ✅ Supabase must be loaded FIRST -->
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js"></script>
 
-    <!-- ✅ Then your configuration (update with your keys) -->
-    <script type="module" src="config.js"></script>
-
-    <!-- ✅ Then your main app logic -->
+    <!-- Config + App -->
+    <script src="config.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>
